@@ -1,0 +1,111 @@
+name: "Continuous integration"
+
+on:
+  workflow_call:
+    inputs:
+      plugin-key:
+        required: true
+        type: string
+      glpi-version:
+        required: true
+        type: string
+      php-version:
+        required: true
+        type: string
+      db-image:
+        required: true
+        type: string
+
+jobs:
+  ci:
+    name: "Continuous integration"
+    runs-on: "ubuntu-latest"
+    container:
+      image: "ghcr.io/glpi-project/githubactions-glpi:php-${{ inputs.php-version }}-glpi-${{ inputs.glpi-version }}"
+      options: >-
+        --volume ${{ github.workspace }}:/var/glpi/plugins:rw
+    services:
+      db:
+        image: "ghcr.io/glpi-project/githubactions-${{ inputs.db-image }}"
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+          MYSQL_DATABASE: "glpi"
+        options: >-
+          --shm-size=1g
+    defaults:
+      run:
+        shell: "bash"
+        working-directory: "/var/glpi/plugins/${{ inputs.plugin-key }}"
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+        with:
+            path: "${{ inputs.plugin-key }}"
+      - name: "Get dependencies cache directories"
+        id: "composer-cache"
+        run: |
+          echo "composer_cache_dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+          echo "npm_cache_dir=$(npm config get cache)" >> $GITHUB_OUTPUT
+      - name: "Restore dependencies cache"
+        uses: "actions/cache@v3"
+        with:
+          path: |
+            ${{ steps.composer-cache.outputs.composer_cache_dir }}
+            ${{ steps.composer-cache.outputs.npm_cache_dir }}
+          key: "${{ inputs.plugin-key }}-dependencies-${{ inputs.php-version }}-${{ github.job }}-${{ hashFiles('**/composer.lock', '**/package-lock.json') }}"
+          restore-keys: |
+            ${{ inputs.plugin-key }}-dependencies-${{ inputs.php-version }}-${{ github.job }}-
+            ${{ inputs.plugin-key }}-dependencies-${{ inputs.php-version }}-
+            ${{ inputs.plugin-key }}-dependencies-
+      - name: "Install dependencies"
+        run: |
+          if [[ -f "composer.json" ]]; then
+            composer install --ansi --no-interaction --no-progress --prefer-dist
+          fi
+          if [[ -f "package.json" ]]; then
+            npm install --no-save
+          fi
+      - name: "PHP Lint"
+        run: |
+          if [[ -f "vendor/bin/parallel-lint" ]]; then
+            echo -e "\033[0;33mExecuting PHP Parallel Lint...\033[0m"
+            vendor/bin/parallel-lint --colors --exclude ./vendor/ --no-progress .
+          fi
+          if [[ -f "vendor/bin/phpcs" && -f ".phpcs.xml" ]]; then
+            echo -e "\033[0;33mExecuting PHP CodeSniffer...\033[0m"
+            vendor/bin/phpcs
+          fi
+          if [[ -f "vendor/bin/phpstan" && -f "phpstan.neon" ]]; then
+            echo -e "\033[0;33mExecuting PHPStan...\033[0m"
+            vendor/bin/phpstan analyze --ansi --memory-limit=2G --no-interaction --no-progress
+          fi
+      - name: "JS Lint"
+        run: |
+          if [[ -f "node_modules/.bin/eslint" && -f ".eslintrc.js" ]]; then
+            echo -e "\033[0;33mExecuting ESLint...\033[0m"
+            node_modules/.bin/eslint --color .
+          fi
+      - name: "CSS Lint"
+        run: |
+          if [[ -f "node_modules/.bin/stylelint" && -f ".stylelintrc.js" ]]; then
+            echo -e "\033[0;33mExecuting Stylelint...\033[0m"
+            node_modules/.bin/stylelint --color "**/*.css" "**/*.scss"
+          fi
+      - name: "Misc lint"
+        run: |
+          if [[ -f "vendor/bin/licence-headers-check" && -f "tools/HEADER" ]]; then
+            echo -e "\033[0;33mExecuting licence headers checks...\033[0m"
+            vendor/bin/licence-headers-check --ansi --no-interaction
+          fi
+      - name: "Install plugin"
+        working-directory: "/var/glpi"
+        run: |
+          bin/console database:install --ansi --no-interaction --db-name=glpi --db-host=db --db-user=root --strict-configuration
+          bin/console plugin:install --ansi --no-interaction --username=glpi ${{ inputs.plugin-key }}
+          bin/console plugin:activate --ansi --no-interaction ${{ inputs.plugin-key }}
+      - name: "PHPUnit"
+        run: |
+          if [[ -f "vendor/bin/phpunit" && -f "phpunit.xml" ]]; then
+            echo -e "\033[0;33mExecuting PHPUnit...\033[0m"
+            php vendor/bin/phpunit --colors=always
+          fi
