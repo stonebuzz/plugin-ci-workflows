@@ -65,37 +65,53 @@ jobs:
           if [[ -f "package.json" ]]; then
             npm install --no-save
           fi
-      - name: "PHP Lint"
+      - name: "PHP Parallel Lint"
         run: |
           if [[ -f "vendor/bin/parallel-lint" ]]; then
             echo -e "\033[0;33mExecuting PHP Parallel Lint...\033[0m"
             vendor/bin/parallel-lint --colors --exclude ./vendor/ --no-progress .
+          else
+            echo -e "\033[PHP Parallel Lint execution skipped.\033[0m"
           fi
+      - name: "PHP CodeSniffer"
+        run: |
           if [[ -f "vendor/bin/phpcs" && -f ".phpcs.xml" ]]; then
             echo -e "\033[0;33mExecuting PHP CodeSniffer...\033[0m"
             vendor/bin/phpcs
+          else
+            echo -e "\033[PHP CodeSniffer execution skipped.\033[0m"
           fi
+      - name: "PHPStan"
+        run: |
           if [[ -f "vendor/bin/phpstan" && -f "phpstan.neon" ]]; then
             echo -e "\033[0;33mExecuting PHPStan...\033[0m"
             vendor/bin/phpstan analyze --ansi --memory-limit=2G --no-interaction --no-progress
+          else
+            echo -e "\033[PHPStan execution skipped.\033[0m"
           fi
       - name: "JS Lint"
         run: |
           if [[ -f "node_modules/.bin/eslint" && -f ".eslintrc.js" ]]; then
             echo -e "\033[0;33mExecuting ESLint...\033[0m"
             node_modules/.bin/eslint --color .
+          else
+            echo -e "\033[0;33mESLint execution skipped.\033[0m"
           fi
       - name: "CSS Lint"
         run: |
           if [[ -f "node_modules/.bin/stylelint" && -f ".stylelintrc.js" ]]; then
             echo -e "\033[0;33mExecuting Stylelint...\033[0m"
             node_modules/.bin/stylelint --color "**/*.css" "**/*.scss"
+          else
+            echo -e "\033[0;33mStylelint execution skipped.\033[0m"
           fi
       - name: "Misc lint"
         run: |
           if [[ -f "vendor/bin/licence-headers-check" && -f "tools/HEADER" ]]; then
             echo -e "\033[0;33mExecuting licence headers checks...\033[0m"
             vendor/bin/licence-headers-check --ansi --no-interaction
+          else
+            echo -e "\033[0;33mLicence headers checks skipped.\033[0m"
           fi
       - name: "Install plugin"
         working-directory: "/var/glpi"
@@ -108,4 +124,6 @@ jobs:
           if [[ -f "vendor/bin/phpunit" && -f "phpunit.xml" ]]; then
             echo -e "\033[0;33mExecuting PHPUnit...\033[0m"
             php vendor/bin/phpunit --colors=always
+          else
+            echo -e "\033[PHPUnit execution skipped.\033[0m"
           fi
