@@ -21,7 +21,14 @@ You will have to use your plugin system name in the `plugin-key` parameter.
 name: "Continuous integration"
 
 on:
+  push:
+    branches:
+      - "main"
+    tags:
+       - "*"
   pull_request:
+  schedule:
+    - cron: "0 0 * * *"
 
 jobs:
   ci:
@@ -32,7 +39,7 @@ jobs:
         include:
           - {glpi-version: "10.0.x", php-version: "7.4", db-image: "mysql:5.7"}
           - {glpi-version: "10.0.x", php-version: "8.2", db-image: "mariadb:10.6"}
-    uses: glpi-project/plugin-ci-workflows/.github/workflows/continuous-integration.yml@v1
+    uses: "glpi-project/plugin-ci-workflows/.github/workflows/continuous-integration.yml@v1"
     with:
       plugin-key: "myplugin"
       glpi-version: "${{ matrix.glpi-version }}"
