@@ -113,7 +113,7 @@ jobs:
           fi
       - name: "JS Lint"
         run: |
-          if [[ -f "node_modules/.bin/eslint" && -f ".eslintrc.js" ]]; then
+          if [[ -f "node_modules/.bin/eslint" && ( -f "eslint.config.js" || -f "eslint.config.mjs" || -f "eslint.config.cjs" || -f ".eslintrc.js" ) ]]; then
             echo -e "\033[0;33mExecuting ESLint...\033[0m"
             node_modules/.bin/eslint --color .
           else
