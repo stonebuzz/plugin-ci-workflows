@@ -1,0 +1,19 @@
+name: changelog-check
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    name: Check Actions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Changelog check
+        uses: Zomzog/changelog-checker@v1.2.0
+        with:
+          fileName: CHANGELOG.md
+          noChangelogLabel: no changelog # default `no changelog`
+          checkNotification: Detailed # default `Detailed` or `Simple`
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
