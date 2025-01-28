@@ -71,6 +71,14 @@ jobs:
         run: |
           sudo setfacl --recursive --modify u:www-data:rwx "${{ env.CACHE_DIR }}"
           sudo setfacl --recursive --modify u:www-data:rwx /var/www/glpi/plugins
+      - name: "Misc lint"
+        run: |
+          if [[ -f "vendor/bin/licence-headers-check" && -f "tools/HEADER" ]]; then
+            echo -e "\033[0;33mExecuting licence headers checks...\033[0m"
+            vendor/bin/licence-headers-check --ansi --no-interaction
+          else
+            echo -e "\033[0;33mLicence headers checks skipped.\033[0m"
+          fi
       - name: "Install dependencies"
         run: |
           if [[ -f "composer.json" ]]; then
@@ -126,14 +134,6 @@ jobs:
             node_modules/.bin/stylelint --color "**/*.css" "**/*.scss"
           else
             echo -e "\033[0;33mStylelint execution skipped.\033[0m"
-          fi
-      - name: "Misc lint"
-        run: |
-          if [[ -f "vendor/bin/licence-headers-check" && -f "tools/HEADER" ]]; then
-            echo -e "\033[0;33mExecuting licence headers checks...\033[0m"
-            vendor/bin/licence-headers-check --ansi --no-interaction
-          else
-            echo -e "\033[0;33mLicence headers checks skipped.\033[0m"
           fi
       - name: "Install plugin"
         working-directory: "/var/www/glpi"
