@@ -144,7 +144,7 @@ jobs:
         if: ${{ !cancelled() && hashFiles(format('{0}/composer.json', inputs.plugin-key)) != '' }}
         run: |
           echo -e "\033[0;33mChecking for common dependencies between plugin and core...\033[0m"
-          PLUGIN_PROD_JSON=$(composer show --direct --no-dev --format=json)
+          PLUGIN_PROD_JSON=$(composer show --no-dev --format=json)
           CORE_PROD_JSON=$(cd ../../ && composer show --no-dev --format=json)
           CORE_ALL_JSON=$(cd ../../ && composer show --format=json)
           PLUGIN_PROD_NAMES=$(echo "$PLUGIN_PROD_JSON" | jq -r '(.installed? // [])[] | .name')
