@@ -28,8 +28,8 @@ jobs:
           {
             "10.0.x": {
               "minimal": [
-                {"php-version": "7.4", "db-image": "mariadb:10.2"},
-                {"php-version": "8.5", "db-image": "mariadb:11.8"}
+                {"php-version": "7.4", "db-image": "mysql:5.7"},
+                {"php-version": "8.5", "db-image": "mariadb:10.2"}
               ],
               "complete": [
                 {"php-version": "7.4", "db-image": "mariadb:10.2"},
@@ -43,8 +43,8 @@ jobs:
             },
             "11.0.x": {
               "minimal": [
-                {"php-version": "8.2", "db-image": "mariadb:10.6"},
-                {"php-version": "8.5", "db-image": "mariadb:12.3"}
+                {"php-version": "8.2", "db-image": "mysql:8.0"},
+                {"php-version": "8.5", "db-image": "mariadb:10.6"}
               ],
               "complete": [
                 {"php-version": "8.2", "db-image": "mariadb:10.6"},
@@ -55,8 +55,8 @@ jobs:
             },
             "12.0.x": {
               "minimal": [
-                {"php-version": "8.3", "db-image": "mariadb:10.11"},
-                {"php-version": "8.5", "db-image": "mariadb:12.3"}
+                {"php-version": "8.3", "db-image": "mysql:8.0"},
+                {"php-version": "8.5", "db-image": "mariadb:10.11"}
               ],
               "complete": [
                 {"php-version": "8.3", "db-image": "mariadb:10.11"},
