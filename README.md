@@ -85,6 +85,14 @@ On pull requests, the workflow checks that the `CHANGELOG` file has been updated
 
 On pull requests that modify `plugin.xml` or `<plugin-key>.xml`, the workflow also validates that all URLs declared in the file are reachable. URLs inside `<download_url>` tags that are newly introduced by the PR only produce a warning (the release archive may not be published yet), while all other invalid URLs fail the check.
 
+When a `composer.json` file is present, the workflow checks that it defines the Composer autoloader suffix as `Plugin` followed by the capitalized plugin key, to prevent autoloader class name collisions with GLPI or other plugins. For instance, for the `myplugin` plugin:
+
+```json
+"config": {
+    "autoloader-suffix": "PluginMyplugin"
+}
+```
+
 ## Code coverage
 
 Code coverage is automatically enabled when a `.glpi-coverage.json` configuration file is present at the root of the plugin directory.

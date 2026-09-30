@@ -178,6 +178,18 @@ jobs:
             exit 1
           fi
           echo "✅ No dependency conflicts detected."
+      - name: "Check composer autoloader suffix"
+        if: ${{ !cancelled() && hashFiles(format('{0}/composer.json', inputs.plugin-key)) != '' }}
+        env:
+          PLUGIN_KEY: ${{ inputs.plugin-key }}
+        run: |
+          EXPECTED_SUFFIX="Plugin${PLUGIN_KEY^}"
+          ACTUAL_SUFFIX=$(jq -r '.config["autoloader-suffix"] // empty' composer.json)
+          if [[ "$ACTUAL_SUFFIX" != "$EXPECTED_SUFFIX" ]]; then
+            echo "❌ composer.json must define \"config\": { \"autoloader-suffix\": \"${EXPECTED_SUFFIX}\" } (found: '${ACTUAL_SUFFIX:-none}')."
+            exit 1
+          fi
+          echo "✅ Composer autoloader suffix is '${EXPECTED_SUFFIX}'."
       - name: "Install npm dependencies"
         if: ${{ !cancelled() && hashFiles(format('{0}/package.json', inputs.plugin-key)) != '' }}
         run: |
