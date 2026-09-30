@@ -85,7 +85,8 @@ On pull requests, the workflow checks that the `CHANGELOG` file has been updated
 
 On pull requests that modify `plugin.xml` or `<plugin-key>.xml`, the workflow also validates that all URLs declared in the file are reachable. URLs inside `<download_url>` tags that are newly introduced by the PR only produce a warning (the release archive may not be published yet), while all other invalid URLs fail the check.
 
-When a `composer.json` file is present, the workflow checks that it defines the Composer autoloader suffix as `Plugin` followed by the capitalized plugin key, to prevent autoloader class name collisions with GLPI or other plugins. For instance, for the `myplugin` plugin:
+When a `composer.json` file is present, the workflow checks that the Composer autoloader suffix is unique, to prevent autoloader class name collisions with GLPI or other plugins.
+The check passes if `composer.json` defines a non-empty `name` property (Composer then derives the suffix from the lock file content hash, which includes the package name), or if it defines the autoloader suffix as `Plugin` followed by the capitalized plugin key. For instance, for the `myplugin` plugin:
 
 ```json
 "config": {
