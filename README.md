@@ -89,6 +89,9 @@ When a `composer.json` file is present, the workflow checks that the Composer au
 The check passes if `composer.json` defines a non-empty `name` property (Composer then derives the suffix from the lock file content hash, which includes the package name), or if it defines the autoloader suffix as `Plugin` followed by the capitalized plugin key. For instance, for the `myplugin` plugin:
 
 ```json
+"name": "<project-entity>/<plugin-name> // i.e: glpi-project/myplugin
+...
+// Or inside the config section
 "config": {
     "autoloader-suffix": "PluginMyplugin"
 }
